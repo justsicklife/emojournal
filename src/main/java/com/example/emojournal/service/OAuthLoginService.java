@@ -19,9 +19,9 @@ public class OAuthLoginService {
     private final RequestOAuthInfoService requestOAuthInfoService;
 
     public AuthTokens login(OAuthLoginParams params) {
-        // 사용자 정보를 가져옴
+        // 사용자 정보를 dto 로 가져옴
         OAuthInfoResponse oAuthInfoResponse = requestOAuthInfoService.request(params);
-        // 가져온 유저 oauth 정보를 가지고 멤버 Id 를 찾아줌
+        // 가져온 정보 dto 를 가지고 db 에서 정보를 찾거나 or 만들어줌
         Long memberId = findOrCreateMember(oAuthInfoResponse);
 
         // jwt 토큰을 만드는 메서드
