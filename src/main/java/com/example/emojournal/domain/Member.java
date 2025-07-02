@@ -15,6 +15,7 @@ public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_id")
     private Long id;
 
     private String email;
@@ -22,8 +23,6 @@ public class Member {
 
     @Enumerated(EnumType.STRING)
     private OAuthProvider oAuthProvider;
-
-    private String refreshToken;
 
     @Builder
     public Member(Long id, String email, String nickname, OAuthProvider oAuthProvider) {

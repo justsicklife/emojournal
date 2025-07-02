@@ -16,7 +16,7 @@ import java.time.Duration;
 import java.util.Map;
 
 @Slf4j
-@Controller
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/login/oauth2/code")
 public class OAuthController {
