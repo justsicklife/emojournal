@@ -1,36 +1,39 @@
 package com.example.emojournal.controller;
 
 import com.example.emojournal.auth.token.AuthTokenGenerator;
+import com.example.emojournal.auth.token.AuthTokens;
+import com.example.emojournal.domain.RefreshToken;
+import com.example.emojournal.repository.RefreshTokenRepository;
+import com.example.emojournal.service.RefreshTokenService;
+import com.example.emojournal.service.TokenReissueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+
 @RestController
 @RequiredArgsConstructor
 public class RefreshTokenController {
 
-    private final AuthTokenGenerator authTokenGenerator;
+    private final TokenReissueService tokenReissueService;
 
     // access token 이 만료되서 refresh token 이 있는지 확인하고 access token 을 재발급 하는 메서드
     @PostMapping("/auth/reissue")
-    public ResponseEntity<?> reissueAccessToken(@CookieValue(name = "refreshToken") String refreshToken) {
+    public ResponseEntity<?> reissueAccessToken(@CookieValue(name = "refreshToken") String refreshTokenCookie) {
 
-        // 할일
-        // 1. 클라이언트에서 보낸 리프레쉬 토큰을 받음
-        Long memberId = authTokenGenerator.extractMemberId(refreshToken);
+        AuthTokens authTokens = tokenReissueService.reissueAccessToken(refreshTokenCookie).orElseThrow(NoSuchElementException::new);
 
-
-
-
-        // 2. db 에있는 refresh token 과 비교
-        // 3. 같다면 access token 발급
-        // 다만 리프레쉬 토큰을 유효시간은 그대로
-
-
-
-        return null;
+        return ResponseEntity.ok()
+                .body(Map.of(
+                        "accessToken",authTokens.getAccessToken(),
+                        "tokenType",authTokens.getGrantType(),
+                        "expiresIn",authTokens.getExpiresIn()
+                ));
     }
 
 }

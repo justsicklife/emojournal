@@ -1,9 +1,6 @@
 package com.example.emojournal.auth.token;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,9 +12,12 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
+    @Value("${jwt.secret-key}")
+    private String secretKey;
+
     private final Key key;
 
-    public JwtTokenProvider(@Value("${jwt.secret-key}") String secretKey) {
+    public JwtTokenProvider() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
@@ -30,7 +30,22 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String extractSubject(String accessToken) {
+    public Long extractMemberId(String accessToken) {
+        return Long.valueOf(extractSubject(accessToken));
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        }catch (JwtException e) {
+            return  false;
+        }
+    }
+
+    private String extractSubject(String accessToken) {
         Claims claims = parseClaims(accessToken);
         return  claims.getSubject();
     }
@@ -46,4 +61,5 @@ public class JwtTokenProvider {
             return  e.getClaims();
         }
     }
+
 }

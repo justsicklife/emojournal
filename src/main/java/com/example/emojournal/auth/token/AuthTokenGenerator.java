@@ -23,11 +23,9 @@ public class AuthTokenGenerator {
         String accessToken = jwtTokenProvider.generate(subject, accessTokenExpiredAt);
         String refreshToken = jwtTokenProvider.generate(subject, refreshTokenExpiredAt);
 
+        // 만료시간에 1000L 을 나누는이유 밀리 세컨드 단위에서 초 단위로 변환 하려고
+        // 변환이유는 Oauth 표준이 초 단위 인가봄
         return AuthTokens.of(accessToken,refreshToken,BEARER_TYPE,ACCESS_TOKEN_EXPIRE_TIME / 1000L);
-    }
-
-    public Long extractMemberId(String accessToken) {
-        return Long.valueOf(jwtTokenProvider.extractSubject(accessToken));
     }
 
 }

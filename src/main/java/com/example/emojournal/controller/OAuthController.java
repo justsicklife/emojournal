@@ -1,9 +1,14 @@
 package com.example.emojournal.controller;
 
+import com.example.emojournal.auth.dto.LoginResponse;
 import com.example.emojournal.auth.token.AuthTokens;
 import com.example.emojournal.auth.dto.GoogleLoginParams;
+import com.example.emojournal.domain.Member;
+import com.example.emojournal.domain.RefreshToken;
 import com.example.emojournal.dto.AuthorizationCodeRequest;
+import com.example.emojournal.service.MemberService;
 import com.example.emojournal.service.OAuthLoginService;
+import com.example.emojournal.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -13,6 +18,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Map;
 
 @Slf4j
@@ -23,20 +31,29 @@ public class OAuthController {
 
     private final OAuthLoginService oAuthLoginService;
 
+    private final RefreshTokenService refreshTokenService;
+
+    private final MemberService memberService;
+
     @PostMapping("/google")
     public ResponseEntity<?> loginGoogle(@RequestBody AuthorizationCodeRequest codeRequest) {
 
-        // 바디에 있는 params 를 받음
-        // params 에는 authorizationCode 가 있음
-        // 구글 소셜로그인으로 로그인 하는 메서드
-
+        // authorization code 를 넣어줌
         GoogleLoginParams params = new GoogleLoginParams();
         params.setAuthorizationCode(codeRequest.getCode());
 
-        AuthTokens authTokens = oAuthLoginService.login(params);
+        // 구글 로그인을 함
+        // 토큰 객체를 받아옴
+        LoginResponse loginResponse = oAuthLoginService.login(params);
+        AuthTokens authTokens = loginResponse.getTokens();
 
         String accessToken = authTokens.getAccessToken();
         String refreshToken = authTokens.getRefreshToken();
+
+        // memberId 로 member 를찾아야됨
+        Member member = memberService.findMemberById(loginResponse.getMemberId());
+
+        refreshTokenService.saveRefreshToken(RefreshToken.create(refreshToken, LocalDateTime.now().plusWeeks(1),member));
 
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true) // 자바스크립트에서 접근불가
