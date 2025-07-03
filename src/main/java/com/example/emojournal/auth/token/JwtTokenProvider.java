@@ -3,22 +3,22 @@ package com.example.emojournal.auth.token;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
 
+@Slf4j
 @Component
 public class JwtTokenProvider {
 
-    @Value("${jwt.secret-key}")
-    private String secretKey;
-
     private final Key key;
 
-    public JwtTokenProvider() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+    public JwtTokenProvider(@Value("${jwt.secret-key}") String SECRET_KEY) {
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
@@ -36,12 +36,13 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(secretKey)
+            log.info("validateToken");
+            Jwts.parserBuilder().setSigningKey(key)
                     .build()
                     .parseClaimsJws(token);
             return true;
         }catch (JwtException e) {
-            return  false;
+            return false;
         }
     }
 
