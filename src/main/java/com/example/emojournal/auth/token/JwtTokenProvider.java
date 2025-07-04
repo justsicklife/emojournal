@@ -37,11 +37,13 @@ public class JwtTokenProvider {
     public boolean validateToken(String token) {
         try {
             log.info("validateToken");
+            log.info(token);
             Jwts.parserBuilder().setSigningKey(key)
                     .build()
                     .parseClaimsJws(token);
             return true;
         }catch (JwtException e) {
+            log.warn(e.toString());
             return false;
         }
     }

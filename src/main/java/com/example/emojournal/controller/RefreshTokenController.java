@@ -7,6 +7,7 @@ import com.example.emojournal.repository.RefreshTokenRepository;
 import com.example.emojournal.service.RefreshTokenService;
 import com.example.emojournal.service.TokenReissueService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class RefreshTokenController {
@@ -25,6 +27,8 @@ public class RefreshTokenController {
     // access token 이 만료되서 refresh token 이 있는지 확인하고 access token 을 재발급 하는 메서드
     @PostMapping("/auth/reissue")
     public ResponseEntity<?> reissueAccessToken(@CookieValue(name = "refreshToken") String refreshTokenCookie) {
+
+        log.info("refreshToken Cookie : " + refreshTokenCookie);
 
         AuthTokens authTokens = tokenReissueService.reissueAccessToken(refreshTokenCookie).orElseThrow(NoSuchElementException::new);
 
