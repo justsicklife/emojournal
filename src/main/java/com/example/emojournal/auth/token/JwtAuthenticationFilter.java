@@ -34,9 +34,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+
+        String uri = request.getRequestURI();
+
+        if(isPublicPath(uri)) {
+            filterChain.doFilter(request,response);
+            return;
+        }
+
         String token = resolveToken(request);
 
-        // access token 이 있다면
+        // access token 이 있고 토큰이 정확하다면
         if(token != null && jwtTokenProvider.validateToken(token)) {
             Long memberId = jwtTokenProvider.extractMemberId(token);
 
@@ -45,7 +53,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request,response);
         }
+        // 리프레쉬 토큰이 있으면 다음 필터로 넘어감
         else if(extractRefreshTokenFromCookie(request) != null) {
+            log.info("로그아웃");
             filterChain.doFilter(request,response);
         }
         else {
@@ -90,5 +100,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         return null;
     }
+
+
+    // 토큰 인증이 필요없는 요청 경로 작성하는 메서드
+    public boolean isPublicPath(String uri) {
+        return uri.startsWith("/login/oauth2/code");
+    }
+
 
 }

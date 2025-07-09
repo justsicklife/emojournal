@@ -38,6 +38,7 @@ public class JwtTokenProvider {
         try {
             log.info("validateToken");
             log.info(token);
+            // 토큰 만료되었는지 확인 하는 코드
             Jwts.parserBuilder().setSigningKey(key)
                     .build()
                     .parseClaimsJws(token);

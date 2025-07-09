@@ -58,7 +58,7 @@ public class OAuthController {
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true) // 자바스크립트에서 접근불가
                 .secure(false) // HTTPS 일때만 전송됨
-                .path("/auth/reissue") // /auth/reissue 요청할 때만 쿠키 자동 포함됨
+                .path("/auth") // /auth 요청할 때만 쿠키 자동 포함됨
                 .maxAge(Duration.ofDays(7)) // 쿠키 만료 시간 7일
                 .sameSite("Lax") // 외부 사이트 요청 시 쿠키가 전송되지 않게 하는 코드
                 .build();

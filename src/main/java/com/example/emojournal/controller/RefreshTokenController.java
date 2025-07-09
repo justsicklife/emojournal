@@ -8,11 +8,14 @@ import com.example.emojournal.service.RefreshTokenService;
 import com.example.emojournal.service.TokenReissueService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -23,6 +26,8 @@ import java.util.Optional;
 public class RefreshTokenController {
 
     private final TokenReissueService tokenReissueService;
+
+    private final RefreshTokenService refreshTokenService;
 
     // access token 이 만료되서 refresh token 이 있는지 확인하고 access token 을 재발급 하는 메서드
     @PostMapping("/auth/reissue")
@@ -39,5 +44,25 @@ public class RefreshTokenController {
                         "expiresIn",authTokens.getExpiresIn()
                 ));
     }
+
+    @PostMapping("/auth/logout")
+    public ResponseEntity<?> logout(@CookieValue(name = "refreshToken") String refreshTokenCookie) {
+        log.info("logout");
+
+        refreshTokenService.logout(refreshTokenCookie);
+
+        ResponseCookie refreshTokenHeader = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/auth")
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE,refreshTokenHeader.toString())
+                .body(Map.of("message","로그아웃 완료"));
+
+    }
+
 
 }
