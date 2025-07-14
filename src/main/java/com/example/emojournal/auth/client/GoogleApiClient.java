@@ -70,6 +70,8 @@ public class GoogleApiClient implements OAuthApiClient{
 
         GoogleTokens response = restTemplate.postForObject(url, request, GoogleTokens.class);
 
+        log.info(response.toString());
+
         if (response == null) {
             throw new IllegalStateException("response가 null입니다.");
         }
@@ -78,6 +80,7 @@ public class GoogleApiClient implements OAuthApiClient{
     }
 
 
+    // 발급받은 access token 으로 사용자 정보 가져옴
     @Override
     public OAuthInfoResponse requestOauthInfo(String accessToken) {
         String url = "https://www.googleapis.com/oauth2/v2/userinfo";

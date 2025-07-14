@@ -1,13 +1,13 @@
 package com.example.emojournal.domain.token;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@ToString
 @Getter
 @NoArgsConstructor
 public class GoogleTokens {

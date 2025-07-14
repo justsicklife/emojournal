@@ -3,9 +3,11 @@ package com.example.emojournal.controller;
 import com.example.emojournal.auth.dto.LoginResponse;
 import com.example.emojournal.auth.token.AuthTokens;
 import com.example.emojournal.auth.dto.GoogleLoginParams;
+import com.example.emojournal.domain.GoogleRefreshToken;
 import com.example.emojournal.domain.Member;
 import com.example.emojournal.domain.RefreshToken;
 import com.example.emojournal.dto.AuthorizationCodeRequest;
+import com.example.emojournal.service.GoogleRefreshTokenService;
 import com.example.emojournal.service.MemberService;
 import com.example.emojournal.service.OAuthLoginService;
 import com.example.emojournal.service.RefreshTokenService;
@@ -22,6 +24,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -35,6 +38,8 @@ public class OAuthController {
 
     private final MemberService memberService;
 
+    private final GoogleRefreshTokenService googleRefreshTokenService;
+
     @PostMapping("/google")
     public ResponseEntity<?> loginGoogle(@RequestBody AuthorizationCodeRequest codeRequest) {
 
@@ -42,16 +47,27 @@ public class OAuthController {
         GoogleLoginParams params = new GoogleLoginParams();
         params.setAuthorizationCode(codeRequest.getCode());
 
-        // 구글 로그인을 함
-        // 토큰 객체를 받아옴
+        // 받은 code 를 매게변수로 넘겨주고
+        // 토큰 객체, memberId 를 받아옴
         LoginResponse loginResponse = oAuthLoginService.login(params);
         AuthTokens authTokens = loginResponse.getTokens();
 
+
         String accessToken = authTokens.getAccessToken();
-        String refreshToken = authTokens.getRefreshToken();
+
+        // 구글 서버에서 준 refresh token
+        String googleRefreshToken = authTokens.getRefreshToken();
+
+        // 스프링 서버에서 만드는 refresh token
+        String refreshToken = UUID.randomUUID().toString();
 
         // memberId 로 member 를찾아야됨
         Member member = memberService.findMemberById(loginResponse.getMemberId());
+
+        GoogleRefreshToken googleRefreshTokenEntity = GoogleRefreshToken.create(member, googleRefreshToken);
+
+        googleRefreshTokenService.save(googleRefreshTokenEntity);
+
 
         refreshTokenService.saveRefreshToken(RefreshToken.create(refreshToken, LocalDateTime.now().plusWeeks(1),member));
 

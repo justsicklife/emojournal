@@ -11,17 +11,28 @@ import com.example.emojournal.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+
+// OAuthLoginService 의 책임
+// Authorization code 를 받아서 로그인 하는 책임을 가지고 있음
 @Service
 @RequiredArgsConstructor
 public class OAuthLoginService {
 
+    // jpa 에서 member 와 관련된 클래스
     private final MemberRepository memberRepository;
+
+    // 토큰 만드는 생성 클래스
     private final AuthTokenGenerator authTokenGenerator;
+
+    // OAuth 정보들을 요청하는 서비스
     private final RequestOAuthInfoService requestOAuthInfoService;
 
+    // OAuthLoginParams 인터페이스 를 구현한 GoogleLoginParams
     public LoginResponse login(OAuthLoginParams params) {
+
         // 사용자 정보를 dto 로 가져옴
         OAuthInfoResponse oAuthInfoResponse = requestOAuthInfoService.request(params);
+
         // 가져온 정보 dto 를 가지고 db 에서 정보를 찾거나 or 만들어줌
         Long memberId = findOrCreateMember(oAuthInfoResponse);
 

@@ -44,6 +44,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = resolveToken(request);
 
+        log.info("token : " + token);
+
         // access token 이 있고 토큰이 정확하다면
         if(token != null && jwtTokenProvider.validateToken(token)) {
             Long memberId = jwtTokenProvider.extractMemberId(token);

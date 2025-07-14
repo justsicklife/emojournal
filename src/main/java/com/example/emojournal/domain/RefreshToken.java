@@ -35,7 +35,7 @@ public class RefreshToken {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    // ✅ 정적 팩토리 메서드
+    // 정적 팩토리 메서드
     public static RefreshToken create(String refreshToken, LocalDateTime expiresAt, Member member) {
         RefreshToken token = new RefreshToken();
         token.refreshToken = refreshToken;
@@ -46,12 +46,12 @@ public class RefreshToken {
         return token;
     }
 
-    // ✅ 토큰 만료 여부 확인 (도메인 로직)
+    // 토큰 만료 여부 확인 (도메인 로직)
     public boolean isExpired() {
         return LocalDateTime.now().isAfter(this.expiresAt);
     }
 
-    // ✅ 토큰 폐기 로직
+    // 토큰 폐기 로직
     public void revoke() {
         this.revoked = true;
     }

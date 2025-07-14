@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+// RequestOAuthInfoService
+// OAuth 의 정보를 요청하는 service
 @Component
 public class RequestOAuthInfoService {
 
@@ -23,11 +25,24 @@ public class RequestOAuthInfoService {
         );
     }
 
+    // 요청하는 메서드
+    // 반환 받는 값은 OAuthInfoResponse
+    // 매게변수는 OAuthLoginParams
+    // OAuthLoginParams 는 인터페이스이다
+    // 다형성을 이용해서 OAuthLoginParams 를 구현 한 클래스들이 담긴다.
+    // 하지만 소셜로그인을 구글 로그인만 구현 했으므로 지금은 구글 로그인 하나만 구현한
+    // 클래스가 매게변수에 담긴다. GoogleLoginParams 이 클래스다
     public OAuthInfoResponse request(OAuthLoginParams params) {
-        // 어떤 클라이언트 쓸지 결정
+
+        // clients 는 Map 타입이고 키값으로 OAuthProvider 를 갖는다
+        // OAuthProvider 는 Enum 타입이고 지금 값은 한가지 GOOGLE 이란 값을 갖는다.
+        // 키 값에 GOOGLE enum 값을 넣고 value 로 반환하는 것은
+        // GoogleApiClient 이다.
         OAuthApiClient client = clients.get(params.oAuthProvider());
-        // Authorization code -> access Token
+
+        // 구글 서버에 access token 을 받기 위해 요청
         String accessToken = client.requestAccessToken(params);
+
         // accessToken -> 사용자 정보
         return client.requestOauthInfo(accessToken);
     }

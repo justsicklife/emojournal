@@ -63,6 +63,4 @@ public class RefreshTokenController {
                 .body(Map.of("message","로그아웃 완료"));
 
     }
-
-
 }

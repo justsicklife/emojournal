@@ -1,6 +1,7 @@
 package com.example.emojournal.controller;
 
 import com.example.emojournal.domain.Member;
+import com.example.emojournal.dto.MemberResponseDto;
 import com.example.emojournal.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -16,12 +17,11 @@ public class MemberController {
     private final MemberService memberService;
 
     @GetMapping("/member")
-    public Member showMember(HttpServletRequest request) {
+    public MemberResponseDto showMember(HttpServletRequest request) {
 
         Long memberId = (Long)request.getAttribute("memberId");
 
-//        log.info("memberId : " + memberId);
 
-        return memberService.findMemberById(memberId);
+        return Member.fromEntity(memberService.findMemberById(memberId));
     }
 }

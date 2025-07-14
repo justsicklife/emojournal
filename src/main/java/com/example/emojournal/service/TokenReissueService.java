@@ -9,10 +9,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-// 리프레시 토큰을 받아서 memberId 추출 → access token 재발급 흐름 담당
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -22,15 +22,17 @@ public class TokenReissueService {
 
     private final RefreshTokenRepository refreshTokenRepository;
 
-    private final JwtTokenProvider jwtTokenProvider;
-
+    // access token 재발급
+    // refresh token 이
     public Optional<AuthTokens> reissueAccessToken(String refreshToken) {
         log.info("refresh Token : " + refreshToken);
-        Long memberId = jwtTokenProvider.extractMemberId(refreshToken);
+
         RefreshToken dbRefreshToken = refreshTokenRepository.findByRefreshToken(refreshToken).orElseThrow(NoSuchElementException::new);
 
-        if(dbRefreshToken.getMember().getId().equals(memberId)) {
-            return Optional.of(authTokenGenerator.generate(memberId));
+        LocalDateTime expiresAt = dbRefreshToken.getExpiresAt();
+
+        if(LocalDateTime.now().isBefore(expiresAt)) {
+            return Optional.of(authTokenGenerator.generate(dbRefreshToken.getMember().getId()));
         }
 
         return Optional.empty();
