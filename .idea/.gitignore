@@ -8,3 +8,9 @@
 /dataSources.local.xml
 
 /src/main/resources/env.properties
+
+# Java build output
+/build/
+/out/
+/target/
+/*.class

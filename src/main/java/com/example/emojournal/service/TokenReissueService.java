@@ -1,8 +1,7 @@
 package com.example.emojournal.service;
 
 import com.example.emojournal.auth.token.AuthTokenGenerator;
-import com.example.emojournal.auth.token.AuthTokens;
-import com.example.emojournal.auth.token.JwtTokenProvider;
+import com.example.emojournal.auth.dto.AuthTokens;
 import com.example.emojournal.domain.RefreshToken;
 import com.example.emojournal.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;

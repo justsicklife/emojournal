@@ -17,9 +17,6 @@ public class GoogleInfoResponse implements OAuthInfoResponse {
     @JsonProperty("name")
     private String name;
 
-    @JsonProperty("picture")
-    private String picture;
-
     @Override
     public String getEmail() {
         return email;

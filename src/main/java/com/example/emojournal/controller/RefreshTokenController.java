@@ -1,9 +1,6 @@
 package com.example.emojournal.controller;
 
-import com.example.emojournal.auth.token.AuthTokenGenerator;
-import com.example.emojournal.auth.token.AuthTokens;
-import com.example.emojournal.domain.RefreshToken;
-import com.example.emojournal.repository.RefreshTokenRepository;
+import com.example.emojournal.auth.dto.AuthTokens;
 import com.example.emojournal.service.RefreshTokenService;
 import com.example.emojournal.service.TokenReissueService;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +12,8 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.Duration;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Slf4j
 @RestController

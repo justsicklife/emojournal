@@ -2,7 +2,10 @@ package com.example.emojournal.auth.client;
 
 import com.example.emojournal.auth.dto.OAuthInfoResponse;
 import com.example.emojournal.auth.dto.OAuthLoginParams;
+import com.example.emojournal.auth.dto.OAuthLoginResponse;
+import com.example.emojournal.auth.dto.OAuthTokens;
 import com.example.emojournal.domain.item.OAuthProvider;
+import com.example.emojournal.auth.dto.GoogleTokenResponse;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -32,7 +35,7 @@ public class RequestOAuthInfoService {
     // 다형성을 이용해서 OAuthLoginParams 를 구현 한 클래스들이 담긴다.
     // 하지만 소셜로그인을 구글 로그인만 구현 했으므로 지금은 구글 로그인 하나만 구현한
     // 클래스가 매게변수에 담긴다. GoogleLoginParams 이 클래스다
-    public OAuthInfoResponse request(OAuthLoginParams params) {
+    public OAuthLoginResponse request(OAuthLoginParams params) {
 
         // clients 는 Map 타입이고 키값으로 OAuthProvider 를 갖는다
         // OAuthProvider 는 Enum 타입이고 지금 값은 한가지 GOOGLE 이란 값을 갖는다.
@@ -41,10 +44,18 @@ public class RequestOAuthInfoService {
         OAuthApiClient client = clients.get(params.oAuthProvider());
 
         // 구글 서버에 access token 을 받기 위해 요청
-        String accessToken = client.requestAccessToken(params);
+        GoogleTokenResponse token = client.requestAccessToken(params);
+
+        // 소셜로그인에서 준 access token,refresh token
+        String oAuthRefreshToken = token.getRefreshToken();
+        String oAuthAccessToken = token.getAccessToken();
+        Long expiresIn = token.getExpiresIn();
+
+        OAuthTokens oAuthTokens = new OAuthTokens(oAuthAccessToken, oAuthRefreshToken,expiresIn);
 
         // accessToken -> 사용자 정보
-        return client.requestOauthInfo(accessToken);
-    }
+        OAuthInfoResponse oAuthInfoResponse = client.requestOauthInfo(token.getAccessToken());
 
+        return new OAuthLoginResponse(oAuthInfoResponse,oAuthTokens);
+    }
 }

@@ -4,7 +4,7 @@ import com.example.emojournal.auth.dto.GoogleInfoResponse;
 import com.example.emojournal.auth.dto.OAuthInfoResponse;
 import com.example.emojournal.auth.dto.OAuthLoginParams;
 import com.example.emojournal.domain.item.OAuthProvider;
-import com.example.emojournal.domain.token.GoogleTokens;
+import com.example.emojournal.auth.dto.GoogleTokenResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,7 +49,7 @@ public class GoogleApiClient implements OAuthApiClient{
     // server 에서 Authorization server 에 access token 을 받기위해
     // 요청하는 과정
     @Override
-    public String requestAccessToken(OAuthLoginParams params) {
+    public GoogleTokenResponse requestAccessToken(OAuthLoginParams params) {
         // ✅ 실제로 토큰을 요청할 URL
         String url = "https://oauth2.googleapis.com/token";
 
@@ -68,7 +68,7 @@ public class GoogleApiClient implements OAuthApiClient{
 
         HttpEntity<?> request = new HttpEntity<>(body, httpHeaders);
 
-        GoogleTokens response = restTemplate.postForObject(url, request, GoogleTokens.class);
+        GoogleTokenResponse response = restTemplate.postForObject(url, request, GoogleTokenResponse.class);
 
         log.info(response.toString());
 
@@ -76,7 +76,7 @@ public class GoogleApiClient implements OAuthApiClient{
             throw new IllegalStateException("response가 null입니다.");
         }
 
-        return response.getAccessToken();
+        return response;
     }
 
 

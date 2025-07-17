@@ -1,11 +1,8 @@
 package com.example.emojournal.service;
 
 import com.example.emojournal.auth.client.RequestOAuthInfoService;
-import com.example.emojournal.auth.dto.LoginResponse;
-import com.example.emojournal.auth.dto.OAuthInfoResponse;
-import com.example.emojournal.auth.dto.OAuthLoginParams;
+import com.example.emojournal.auth.dto.*;
 import com.example.emojournal.auth.token.AuthTokenGenerator;
-import com.example.emojournal.auth.token.AuthTokens;
 import com.example.emojournal.domain.Member;
 import com.example.emojournal.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,15 +28,16 @@ public class OAuthLoginService {
     public LoginResponse login(OAuthLoginParams params) {
 
         // 사용자 정보를 dto 로 가져옴
-        OAuthInfoResponse oAuthInfoResponse = requestOAuthInfoService.request(params);
+        OAuthLoginResponse oAuthLoginResponse = requestOAuthInfoService.request(params);
+
+        OAuthTokens oAuthTokens = oAuthLoginResponse.getOAuthTokens();
 
         // 가져온 정보 dto 를 가지고 db 에서 정보를 찾거나 or 만들어줌
-        Long memberId = findOrCreateMember(oAuthInfoResponse);
+        Long memberId = findOrCreateMember(oAuthLoginResponse.getOAuthInfoResponse());
 
         AuthTokens authTokens = authTokenGenerator.generate(memberId);
 
-        // jwt 토큰을 만드는 메서드
-        return new LoginResponse(memberId, authTokens);
+        return new LoginResponse(memberId, authTokens,oAuthTokens);
     }
 
     // 매게변수로 oauth 정보를 받음

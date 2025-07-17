@@ -20,19 +20,19 @@ public class GoogleRefreshToken {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id",nullable = false)
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Column(name = "refresh_token",nullable = false,length = 2048)
+    @Column(name = "refresh_token", nullable = false, length = 2048)
     private String refreshToken;
 
-    @Column(name = "issued_at",nullable = false)
+    @Column(name = "issued_at", nullable = false)
     private LocalDateTime issuedAt;
 
-    @Column(name = "revoked",nullable = false)
+    @Column(name = "revoked", nullable = false)
     private boolean revoked = false;
 
-    public static GoogleRefreshToken create(Member member,String refreshToken) {
+    public static GoogleRefreshToken create(Member member, String refreshToken) {
         GoogleRefreshToken googleRefreshToken = new GoogleRefreshToken();
         googleRefreshToken.setMember(member);
         googleRefreshToken.setRefreshToken(refreshToken);
