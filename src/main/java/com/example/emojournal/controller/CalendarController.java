@@ -1,8 +1,6 @@
 package com.example.emojournal.controller;
 
-import com.example.emojournal.auth.token.GoogleTokenCache;
 import com.example.emojournal.calendar.dto.GoogleCalendarEventListResponse;
-import com.example.emojournal.dto.GoogleTokenInfo;
 import com.example.emojournal.service.GoogleCalendarService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +15,7 @@ public class CalendarController {
     private final GoogleCalendarService googleCalendarService;
 
     @GetMapping("/calendar")
-    public GoogleCalendarEventListResponse getCalendar(HttpServletRequest request, @RequestParam String timeMin,@RequestParam String timeMax) {
+    public GoogleCalendarEventListResponse getCalendar(HttpServletRequest request, @RequestParam String timeMin,@RequestParam String timeMax) throws Exception {
 
         Long memberId = (Long)request.getAttribute("memberId");
 

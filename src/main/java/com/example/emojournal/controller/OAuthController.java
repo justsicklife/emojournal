@@ -4,13 +4,12 @@ import com.example.emojournal.auth.dto.LoginResponse;
 import com.example.emojournal.auth.dto.AuthTokens;
 import com.example.emojournal.auth.dto.GoogleLoginParams;
 import com.example.emojournal.auth.dto.OAuthTokens;
-import com.example.emojournal.auth.token.GoogleTokenCache;
-import com.example.emojournal.domain.GoogleRefreshToken;
+import com.example.emojournal.crypto.CryptoUtil;
 import com.example.emojournal.domain.Member;
 import com.example.emojournal.domain.RefreshToken;
 import com.example.emojournal.dto.AuthorizationCodeRequest;
-import com.example.emojournal.dto.GoogleTokenInfo;
-import com.example.emojournal.service.GoogleRefreshTokenService;
+import com.example.emojournal.dto.GoogleTokenDto;
+import com.example.emojournal.service.GoogleTokenService;
 import com.example.emojournal.service.MemberService;
 import com.example.emojournal.service.OAuthLoginService;
 import com.example.emojournal.service.RefreshTokenService;
@@ -38,12 +37,12 @@ public class OAuthController {
 
     private final MemberService memberService;
 
-    private final GoogleRefreshTokenService googleRefreshTokenService;
+    private final GoogleTokenService googleTokenService;
 
-    private final GoogleTokenCache googleTokenCache;
+    private final CryptoUtil cryptoUtil;
 
     @PostMapping("/google")
-    public ResponseEntity<?> loginGoogle(@RequestBody AuthorizationCodeRequest codeRequest) {
+    public ResponseEntity<?> loginGoogle(@RequestBody AuthorizationCodeRequest codeRequest) throws Exception {
 
         // authorization code 를 넣어줌
         GoogleLoginParams params = new GoogleLoginParams();
@@ -61,13 +60,14 @@ public class OAuthController {
 
         log.info("소셜로그인 : " + oAuthTokens.toString());
 
-        // 스프링에서 만든 access token
-        String accessToken = authTokens.getAccessToken();
-
+        // 구글 서버에서 준 access token
         String googleAccessToken = oAuthTokens.getAccessToken();
 
         // 구글 서버에서 준 refresh token
         String googleRefreshToken = oAuthTokens.getRefreshToken();
+
+        // 스프링에서 만든 access token
+        String accessToken = authTokens.getAccessToken();
 
         // 스프링 서버에서 만드는 refresh token
         String refreshToken = UUID.randomUUID().toString();
@@ -75,21 +75,20 @@ public class OAuthController {
         // memberId 로 member 를찾아야됨
         Member member = memberService.findMemberById(loginResponse.getMemberId());
 
-        GoogleTokenInfo googleTokenInfo = GoogleTokenInfo.builder()
-                .accessToken(googleAccessToken)
-                .refreshToken(refreshToken)
-                .expiresIn(3600)
-                .issuedAt(LocalDateTime.now()).build();
+        // 구글 토큰 생성자
+        GoogleTokenDto googleTokenDto = GoogleTokenDto.builder()
+                .accessToken(cryptoUtil.encrypt(googleAccessToken))
+                .refreshToken(cryptoUtil.encrypt(googleRefreshToken))
+                .accessTokenExpiresAt(LocalDateTime.now().plusHours(1))
+                .memberId(member.getId())
+                .build();
 
-        log.info("googleTokenInfo :  " + googleTokenInfo );
+        log.info("googleTokenInfo :  " + googleTokenDto);
 
-        googleTokenCache.save(member.getId(),googleTokenInfo);
+        // 구글 토큰 저장
+        googleTokenService.save(member.getId(),googleTokenDto);
 
-        GoogleRefreshToken googleRefreshTokenEntity = GoogleRefreshToken.create(member, googleRefreshToken);
-
-        googleRefreshTokenService.save(googleRefreshTokenEntity);
-
-
+        // 스프링 서버에서 만든 토큰 저장
         refreshTokenService.saveRefreshToken(RefreshToken.create(refreshToken, LocalDateTime.now().plusWeeks(1),member));
 
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)

@@ -1,17 +1,11 @@
 package com.example.emojournal.auth.client;
 
-import com.example.emojournal.auth.dto.GoogleInfoResponse;
-import com.example.emojournal.auth.dto.OAuthInfoResponse;
-import com.example.emojournal.auth.dto.OAuthLoginParams;
+import com.example.emojournal.auth.dto.*;
 import com.example.emojournal.domain.item.OAuthProvider;
-import com.example.emojournal.auth.dto.GoogleTokenResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -98,6 +92,26 @@ public class GoogleApiClient implements OAuthApiClient{
         return restTemplate.exchange(
                 url, HttpMethod.GET,request, GoogleInfoResponse.class
         ).getBody();
+
+    }
+
+    public GoogleAccessTokenResponse refreshAccessToken(String refreshToken) {
+        String url = "https://oauth2.googleapis.com/token";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("client_id", GOOGLE_CLIENT_ID);
+        params.add("client_secret",GOOGLE_CLIENT_SECRET);
+        params.add("refresh_token", refreshToken);
+        params.add("grant_type", "refresh_token");
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+
+        ResponseEntity<GoogleAccessTokenResponse> response = restTemplate.exchange(url, HttpMethod.POST, request, GoogleAccessTokenResponse.class);
+
+        return response.getBody();
 
     }
 }
