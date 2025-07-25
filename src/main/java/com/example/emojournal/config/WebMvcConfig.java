@@ -1,6 +1,6 @@
 package com.example.emojournal.config;
 
-import com.example.emojournal.interceptor.GoogleTokenInterceptor;
+import com.example.emojournal.auth.oauth.interceptor.GoogleTokenInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
