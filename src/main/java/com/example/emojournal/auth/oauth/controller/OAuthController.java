@@ -13,6 +13,7 @@ import com.example.emojournal.auth.oauth.service.GoogleTokenService;
 import com.example.emojournal.member.service.MemberService;
 import com.example.emojournal.auth.oauth.service.OAuthLoginService;
 import com.example.emojournal.auth.jwt.service.RefreshTokenService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -41,8 +42,11 @@ public class OAuthController {
 
     private final CryptoUtil cryptoUtil;
 
+    // 컨트롤러의 책임 분리 너무 많은 일을 하고있음
+    // 문제가 뭐냐면 컨트롤러를 서비스 하나로 묶어서 해야 되는데 그게 안됨
+    // 그리고 트렌젝션 신경써야됨
     @PostMapping("/google")
-    public ResponseEntity<?> loginGoogle(@RequestBody AuthorizationCodeRequest codeRequest) throws Exception {
+    public ResponseEntity<?> loginGoogle(HttpServletRequest request, @RequestBody AuthorizationCodeRequest codeRequest) throws Exception {
 
         // authorization code 를 넣어줌
         GoogleLoginParams params = new GoogleLoginParams();
@@ -88,8 +92,12 @@ public class OAuthController {
         // 구글 토큰 저장
         googleTokenService.save(member.getId(),googleTokenDto);
 
+        log.info("ip address : " + request.getRemoteAddr());
+
         // 스프링 서버에서 만든 토큰 저장
-        refreshTokenService.saveRefreshToken(RefreshToken.create(refreshToken, LocalDateTime.now().plusWeeks(1),member));
+        refreshTokenService.saveIfNotExists(RefreshToken.create(refreshToken, LocalDateTime.now().plusWeeks(1),request.getRemoteAddr(),member));
+
+        log.info("refreshToken : " + refreshToken);
 
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true) // 자바스크립트에서 접근불가
