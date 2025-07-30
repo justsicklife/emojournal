@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -36,6 +37,9 @@ public class OAuthLoginFacadeService {
 
     private final CryptoUtil cryptoUtil;
 
+    // 자식 메서드,부모 메서드 에러가 뜨면
+    // 그대로 롤백
+    @Transactional
     public OAuthLoginTokenDto handleOAuthLogin(HttpServletRequest request, GoogleLoginParams params) throws Exception {
         // 받은 code 를 매게변수로 넘겨주고
         // 토큰 객체, memberId 를 받아옴
@@ -75,7 +79,7 @@ public class OAuthLoginFacadeService {
         log.info("googleTokenInfo :  " + googleTokenDto);
 
         // 구글 토큰 저장
-        googleTokenService.save(member.getId(),googleTokenDto);
+        googleTokenService.saveIfNotExists(member.getId(),googleTokenDto);
 
         log.info("ip address : " + request.getRemoteAddr());
 
