@@ -1,6 +1,5 @@
 package com.example.emojournal.auth.jwt.filter;
 
-import com.example.emojournal.auth.jwt.entity.exception.InvalidAccessTokenException;
 import com.example.emojournal.auth.jwt.utils.AuthenticationContextHolder;
 import com.example.emojournal.auth.jwt.utils.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
@@ -15,11 +14,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-
-// header 검사 , JWT 토큰 검증, 사용자 인증 객체 세팅
+@Slf4j
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -64,5 +61,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         return null;
     }
-
 }
